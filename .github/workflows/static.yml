@@ -1,16 +1,15 @@
-# .github/workflows/static.yml
-name: Deploy static content to Pages
-on:
-  push:
-    branches: [main]
-jobs:
-  deploy:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/configure-pages@v5
-      - uses: actions/upload-pages-artifact@v3
-        with:
-          path: ./public
-          enablement: true
-      - uses: actions/deploy-pages@v4
+# Ensure a**
+   - Confirm there is a step to build your static build step exists before archiving artifacts
+- name: Build content before archiving ./public.
+   - Example:
+ project
+  run: npm run build
+
+# Archive the correct directory     ```yaml
+     - name: Build static site
+       run: npm run build
+
+     - name: Archive artifact
+
+- name: Archive artifact
+  run: tar -cvf public.tar ./public
