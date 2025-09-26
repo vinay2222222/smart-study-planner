@@ -1,0 +1,1080 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Study Planner</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+            position: relative;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            animation: slideDown 0.8s ease-out;
+        }
+
+        .header h1 {
+            color: white;
+            font-size: 3rem;
+            font-weight: 800;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            color: rgba(255,255,255,0.9);
+            font-size: 1.2rem;
+            font-weight: 300;
+        }
+
+        .dashboard {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .card {
+            background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            animation: slideUp 0.8s ease-out;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 30px 60px rgba(0,0,0,0.15);
+        }
+
+        .card-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .icon {
+            width: 24px;
+            height: 24px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #555;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 15px 20px;
+            border: 2px solid #e1e8ed;
+            border-radius: 12px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .btn:hover::before {
+            left: 100%;
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 30px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn:active {
+            transform: translateY(-1px);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #ff6b6b, #feca57);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a52);
+        }
+
+        .task-item {
+            background: #f8f9ff;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 15px;
+            border-left: 4px solid #667eea;
+            transition: all 0.3s ease;
+            animation: slideInRight 0.5s ease-out;
+        }
+
+        .task-item:hover {
+            transform: translateX(5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+
+        .task-item.completed {
+            border-left-color: #26de81;
+            background: #f0fff4;
+        }
+
+        .task-header {
+            display: flex;
+            justify-content: between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .task-title {
+            font-weight: 700;
+            color: #333;
+            font-size: 1.1rem;
+            flex: 1;
+        }
+
+        .task-priority {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            margin-left: 10px;
+        }
+
+        .priority-high {
+            background: #ffe6e6;
+            color: #ff4757;
+        }
+
+        .priority-medium {
+            background: #fff4e6;
+            color: #ffa502;
+        }
+
+        .priority-low {
+            background: #e6f7ff;
+            color: #2ed573;
+        }
+
+        .task-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 15px;
+            font-size: 14px;
+            color: #666;
+        }
+
+        .task-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn-small {
+            padding: 8px 15px;
+            font-size: 14px;
+            border-radius: 8px;
+        }
+
+        .progress-bar {
+            background: #e1e8ed;
+            border-radius: 10px;
+            height: 8px;
+            overflow: hidden;
+            margin: 20px 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            border-radius: 10px;
+            transition: width 0.5s ease;
+            position: relative;
+        }
+
+        .progress-fill::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            animation: shimmer 2s infinite;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 15px;
+            padding: 25px;
+            text-align: center;
+            transition: all 0.3s ease;
+            animation: fadeIn 0.8s ease-out;
+        }
+
+        .stat-card:hover {
+            transform: scale(1.05);
+        }
+
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: #667eea;
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            color: #666;
+            font-weight: 500;
+            text-transform: uppercase;
+            font-size: 12px;
+            letter-spacing: 1px;
+        }
+
+        .timeline {
+            position: relative;
+            padding-left: 30px;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 15px;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: linear-gradient(180deg, #667eea, #764ba2);
+        }
+
+        .timeline-item {
+            position: relative;
+            margin-bottom: 30px;
+            animation: slideInLeft 0.5s ease-out;
+        }
+
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -37px;
+            top: 5px;
+            width: 12px;
+            height: 12px;
+            background: #667eea;
+            border-radius: 50%;
+            border: 3px solid white;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }
+
+        .timeline-content {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .floating-action {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border: none;
+            border-radius: 50%;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+
+        .floating-action:hover {
+            transform: scale(1.1);
+            box-shadow: 0 15px 35px rgba(102, 126, 234, 0.4);
+        }
+
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            backdrop-filter: blur(10px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1001;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            animation: slideUp 0.3s ease-out;
+        }
+
+        .close {
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            color: #999;
+            transition: color 0.3s ease;
+        }
+
+        .close:hover {
+            color: #333;
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #26de81;
+            color: white;
+            padding: 15px 25px;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(38, 222, 129, 0.3);
+            transform: translateX(400px);
+            transition: transform 0.3s ease;
+            z-index: 1002;
+        }
+
+        .notification.show {
+            transform: translateX(0);
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideInRight {
+            from {
+                opacity: 0;
+                transform: translateX(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes slideInLeft {
+            from {
+                opacity: 0;
+                transform: translateX(-50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        @media (max-width: 768px) {
+            .dashboard {
+                grid-template-columns: 1fr;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>📚 Smart Study Planner</h1>
+            <p>Organize, Track, and Excel in Your Academic Journey</p>
+        </header>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <span class="stat-number" id="totalTasks">0</span>
+                <span class="stat-label">Total Tasks</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-number" id="completedTasks">0</span>
+                <span class="stat-label">Completed</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-number" id="pendingTasks">0</span>
+                <span class="stat-label">Pending</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-number" id="progressPercent">0%</span>
+                <span class="stat-label">Progress</span>
+            </div>
+        </div>
+
+        <div class="dashboard">
+            <div class="card">
+                <h2 class="card-title">
+                    <span class="icon">+</span>
+                    Add New Task
+                </h2>
+                <form id="taskForm">
+                    <div class="form-group">
+                        <label for="taskTitle">Task Title</label>
+                        <input type="text" id="taskTitle" class="form-control" placeholder="Enter task title..." required>
+                    </div>
+                    <div class="form-group">
+                        <label for="taskSubject">Subject</label>
+                        <input type="text" id="taskSubject" class="form-control" placeholder="e.g., Mathematics, Science..." required>
+                    </div>
+                    <div class="form-group">
+                        <label for="taskDescription">Description</label>
+                        <textarea id="taskDescription" class="form-control" rows="3" placeholder="Task details..."></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="taskPriority">Priority</label>
+                        <select id="taskPriority" class="form-control">
+                            <option value="low">🟢 Low Priority</option>
+                            <option value="medium" selected>🟡 Medium Priority</option>
+                            <option value="high">🔴 High Priority</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="taskDueDate">Due Date</label>
+                        <input type="datetime-local" id="taskDueDate" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="taskDuration">Estimated Duration (hours)</label>
+                        <input type="number" id="taskDuration" class="form-control" min="0.5" step="0.5" placeholder="e.g., 2.5">
+                    </div>
+                    <button type="submit" class="btn">
+                        ✨ Create Task
+                    </button>
+                </form>
+            </div>
+
+            <div class="card">
+                <h2 class="card-title">
+                    <span class="icon">📋</span>
+                    My Tasks
+                </h2>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="overallProgress" style="width: 0%"></div>
+                </div>
+                <div id="tasksList">
+                    <div style="text-align: center; padding: 40px; color: #666;">
+                        <div style="font-size: 48px; margin-bottom: 16px;">📝</div>
+                        <p>No tasks yet. Create your first study task to get started!</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2 class="card-title">
+                <span class="icon">📊</span>
+                Study Timeline
+            </h2>
+            <div class="timeline" id="timeline">
+                <div style="text-align: center; padding: 40px; color: #666;">
+                    <div style="font-size: 48px; margin-bottom: 16px;">⏰</div>
+                    <p>Your study timeline will appear here as you add tasks with due dates.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <button class="floating-action" onclick="showQuickAdd()" title="Quick Add Task">
+        ⚡
+    </button>
+
+    <div id="quickAddModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="hideQuickAdd()">&times;</span>
+            <h2>⚡ Quick Add Task</h2>
+            <form id="quickTaskForm">
+                <div class="form-group">
+                    <label for="quickTitle">What do you need to study?</label>
+                    <input type="text" id="quickTitle" class="form-control" placeholder="e.g., Review Chapter 5..." required>
+                </div>
+                <div class="form-group">
+                    <label for="quickSubject">Subject</label>
+                    <input type="text" id="quickSubject" class="form-control" placeholder="Subject name..." required>
+                </div>
+                <div class="form-group">
+                    <label for="quickDueDate">When is it due?</label>
+                    <input type="datetime-local" id="quickDueDate" class="form-control" required>
+                </div>
+                <button type="submit" class="btn">
+                    🚀 Add Task
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <div id="notification" class="notification"></div>
+
+    <script>
+        // Study planner data structure
+        let studyData = {
+            tasks: [],
+            settings: {
+                theme: 'default',
+                notifications: true
+            }
+        };
+
+        // Load data from storage on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            loadData();
+            setDefaultDueDate();
+            renderTasks();
+            renderTimeline();
+            updateStats();
+        });
+
+        // Save data to storage
+        function saveData() {
+            // Note: In a real environment, you would use localStorage here
+            // For Claude.ai artifacts, we'll store in memory only
+            console.log('Data saved to memory:', studyData);
+        }
+
+        // Load data from storage
+        function loadData() {
+            // Note: In a real environment, you would use localStorage here
+            // For Claude.ai artifacts, we'll initialize with empty data
+            console.log('Data loaded from memory');
+        }
+
+        // Set default due date to tomorrow
+        function setDefaultDueDate() {
+            const tomorrow = new Date();
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            tomorrow.setHours(18, 0, 0, 0);
+            
+            const dateString = tomorrow.toISOString().slice(0, 16);
+            document.getElementById('taskDueDate').value = dateString;
+            document.getElementById('quickDueDate').value = dateString;
+        }
+
+        // Add new task
+        document.getElementById('taskForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const task = {
+                id: Date.now(),
+                title: document.getElementById('taskTitle').value,
+                subject: document.getElementById('taskSubject').value,
+                description: document.getElementById('taskDescription').value,
+                priority: document.getElementById('taskPriority').value,
+                dueDate: new Date(document.getElementById('taskDueDate').value),
+                duration: parseFloat(document.getElementById('taskDuration').value) || 1,
+                completed: false,
+                createdAt: new Date()
+            };
+            
+            studyData.tasks.push(task);
+            saveData();
+            
+            // Reset form
+            this.reset();
+            setDefaultDueDate();
+            
+            // Update UI
+            renderTasks();
+            renderTimeline();
+            updateStats();
+            
+            showNotification('✅ Task created successfully!');
+        });
+
+        // Quick add task
+        document.getElementById('quickTaskForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const task = {
+                id: Date.now(),
+                title: document.getElementById('quickTitle').value,
+                subject: document.getElementById('quickSubject').value,
+                description: '',
+                priority: 'medium',
+                dueDate: new Date(document.getElementById('quickDueDate').value),
+                duration: 1,
+                completed: false,
+                createdAt: new Date()
+            };
+            
+            studyData.tasks.push(task);
+            saveData();
+            
+            // Reset form and hide modal
+            this.reset();
+            setDefaultDueDate();
+            hideQuickAdd();
+            
+            // Update UI
+            renderTasks();
+            renderTimeline();
+            updateStats();
+            
+            showNotification('🚀 Quick task added!');
+        });
+
+        // Render all tasks
+        function renderTasks() {
+            const tasksList = document.getElementById('tasksList');
+            
+            if (studyData.tasks.length === 0) {
+                tasksList.innerHTML = `
+                    <div style="text-align: center; padding: 40px; color: #666;">
+                        <div style="font-size: 48px; margin-bottom: 16px;">📝</div>
+                        <p>No tasks yet. Create your first study task to get started!</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            // Sort tasks by due date and priority
+            const sortedTasks = [...studyData.tasks].sort((a, b) => {
+                if (a.completed && !b.completed) return 1;
+                if (!a.completed && b.completed) return -1;
+                
+                const priorityOrder = { high: 3, medium: 2, low: 1 };
+                if (priorityOrder[b.priority] !== priorityOrder[a.priority]) {
+                    return priorityOrder[b.priority] - priorityOrder[a.priority];
+                }
+                
+                return new Date(a.dueDate) - new Date(b.dueDate);
+            });
+            
+            tasksList.innerHTML = sortedTasks.map(task => {
+                const dueDate = new Date(task.dueDate);
+                const now = new Date();
+                const isOverdue = dueDate < now && !task.completed;
+                const timeUntilDue = Math.ceil((dueDate - now) / (1000 * 60 * 60 * 24));
+                
+                return `
+                    <div class="task-item ${task.completed ? 'completed' : ''}" ${isOverdue ? 'style="border-left-color: #ff4757;"' : ''}>
+                        <div class="task-header">
+                            <div class="task-title">${task.completed ? '✅ ' : ''}${task.title}</div>
+                            <span class="task-priority priority-${task.priority}">${task.priority}</span>
+                        </div>
+                        <div style="color: #666; margin-bottom: 8px;">📚 ${task.subject}</div>
+                        ${task.description ? `<div style="color: #888; font-size: 14px; margin-bottom: 12px;">${task.description}</div>` : ''}
+                        <div class="task-meta">
+                            <div>
+                                <span style="margin-right: 15px;">⏰ ${formatDate(dueDate)}</span>
+                                <span style="margin-right: 15px;">🕐 ${task.duration}h</span>
+                                ${isOverdue ? '<span style="color: #ff4757; font-weight: 600;">⚠️ Overdue</span>' : 
+                                  timeUntilDue === 0 ? '<span style="color: #ffa502; font-weight: 600;">📅 Due Today</span>' :
+                                  timeUntilDue === 1 ? '<span style="color: #ffa502; font-weight: 600;">🔔 Due Tomorrow</span>' :
+                                  timeUntilDue > 0 ? `<span style="color: #26de81;">📍 ${timeUntilDue} days left</span>` : ''}
+                            </div>
+                            <div class="task-actions">
+                                <button class="btn btn-small ${task.completed ? 'btn-secondary' : ''}" onclick="toggleTask(${task.id})">
+                                    ${task.completed ? '↩️ Undo' : '✅ Complete'}
+                                </button>
+                                <button class="btn btn-danger btn-small" onclick="deleteTask(${task.id})">🗑️ Delete</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Render timeline
+        function renderTimeline() {
+            const timeline = document.getElementById('timeline');
+            
+            const upcomingTasks = studyData.tasks
+                .filter(task => !task.completed)
+                .sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate))
+                .slice(0, 10); // Show only next 10 tasks
+            
+            if (upcomingTasks.length === 0) {
+                timeline.innerHTML = `
+                    <div style="text-align: center; padding: 40px; color: #666;">
+                        <div style="font-size: 48px; margin-bottom: 16px;">⏰</div>
+                        <p>Your study timeline will appear here as you add tasks with due dates.</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            timeline.innerHTML = upcomingTasks.map(task => {
+                const dueDate = new Date(task.dueDate);
+                const now = new Date();
+                const isOverdue = dueDate < now;
+                
+                return `
+                    <div class="timeline-item">
+                        <div class="timeline-content">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                                <h4 style="margin: 0; color: ${isOverdue ? '#ff4757' : '#333'};">${task.title}</h4>
+                                <span class="task-priority priority-${task.priority}">${task.priority}</span>
+                            </div>
+                            <div style="color: #666; margin-bottom: 8px;">📚 ${task.subject}</div>
+                            <div style="color: #888; font-size: 14px;">
+                                ⏰ ${formatDate(dueDate)} • 🕐 ${task.duration}h
+                                ${isOverdue ? ' • <span style="color: #ff4757; font-weight: 600;">⚠️ Overdue</span>' : ''}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Toggle task completion
+        function toggleTask(taskId) {
+            const task = studyData.tasks.find(t => t.id === taskId);
+            if (task) {
+                task.completed = !task.completed;
+                if (task.completed) {
+                    task.completedAt = new Date();
+                }
+                saveData();
+                renderTasks();
+                renderTimeline();
+                updateStats();
+                
+                showNotification(task.completed ? '🎉 Task completed!' : '↩️ Task marked as pending');
+            }
+        }
+
+        // Delete task
+        function deleteTask(taskId) {
+            if (confirm('Are you sure you want to delete this task?')) {
+                studyData.tasks = studyData.tasks.filter(t => t.id !== taskId);
+                saveData();
+                renderTasks();
+                renderTimeline();
+                updateStats();
+                
+                showNotification('🗑️ Task deleted');
+            }
+        }
+
+        // Update statistics
+        function updateStats() {
+            const total = studyData.tasks.length;
+            const completed = studyData.tasks.filter(t => t.completed).length;
+            const pending = total - completed;
+            const progressPercent = total > 0 ? Math.round((completed / total) * 100) : 0;
+            
+            document.getElementById('totalTasks').textContent = total;
+            document.getElementById('completedTasks').textContent = completed;
+            document.getElementById('pendingTasks').textContent = pending;
+            document.getElementById('progressPercent').textContent = progressPercent + '%';
+            
+            // Update progress bar
+            document.getElementById('overallProgress').style.width = progressPercent + '%';
+        }
+
+        // Utility functions
+        function formatDate(date) {
+            const options = {
+                weekday: 'short',
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            };
+            return date.toLocaleDateString('en-US', options);
+        }
+
+        // Modal functions
+        function showQuickAdd() {
+            document.getElementById('quickAddModal').style.display = 'flex';
+        }
+
+        function hideQuickAdd() {
+            document.getElementById('quickAddModal').style.display = 'none';
+        }
+
+        // Notification system
+        function showNotification(message) {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.classList.add('show');
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', function(e) {
+            // Alt + N for quick add
+            if (e.altKey && e.key === 'n') {
+                e.preventDefault();
+                showQuickAdd();
+                document.getElementById('quickTitle').focus();
+            }
+            
+            // Escape to close modal
+            if (e.key === 'Escape') {
+                hideQuickAdd();
+            }
+        });
+
+        // Click outside modal to close
+        document.getElementById('quickAddModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                hideQuickAdd();
+            }
+        });
+
+        // Auto-save on page unload
+        window.addEventListener('beforeunload', function() {
+            saveData();
+        });
+
+        // Periodic auto-save
+        setInterval(saveData, 30000); // Save every 30 seconds
+
+        // Add some sample data for demonstration
+        function addSampleData() {
+            const sampleTasks = [
+                {
+                    id: 1,
+                    title: "Review Calculus Chapter 3",
+                    subject: "Mathematics",
+                    description: "Focus on derivatives and chain rule",
+                    priority: "high",
+                    dueDate: new Date(Date.now() + 86400000), // Tomorrow
+                    duration: 2.5,
+                    completed: false,
+                    createdAt: new Date()
+                },
+                {
+                    id: 2,
+                    title: "Complete Chemistry Lab Report",
+                    subject: "Chemistry",
+                    description: "Acid-base titration experiment analysis",
+                    priority: "medium",
+                    dueDate: new Date(Date.now() + 2 * 86400000), // Day after tomorrow
+                    duration: 3,
+                    completed: false,
+                    createdAt: new Date()
+                },
+                {
+                    id: 3,
+                    title: "Read History Assignment",
+                    subject: "History",
+                    description: "World War II timeline and key events",
+                    priority: "low",
+                    dueDate: new Date(Date.now() + 3 * 86400000), // 3 days from now
+                    duration: 1.5,
+                    completed: true,
+                    createdAt: new Date()
+                }
+            ];
+            
+            studyData.tasks = sampleTasks;
+            saveData();
+            renderTasks();
+            renderTimeline();
+            updateStats();
+            showNotification('📚 Sample study tasks loaded!');
+        }
+
+        // Add a help tooltip system
+        function initTooltips() {
+            const tooltips = {
+                'taskTitle': 'Enter a clear, descriptive title for your study task',
+                'taskSubject': 'The subject or course this task belongs to',
+                'taskPriority': 'Set priority based on urgency and importance',
+                'taskDueDate': 'When do you need to complete this task?',
+                'taskDuration': 'How many hours do you estimate this will take?'
+            };
+            
+            Object.keys(tooltips).forEach(id => {
+                const element = document.getElementById(id);
+                if (element) {
+                    element.title = tooltips[id];
+                }
+            });
+        }
+
+        // Initialize tooltips on load
+        document.addEventListener('DOMContentLoaded', function() {
+            initTooltips();
+        });
+
+        // Add study session timer functionality
+        let studyTimer = {
+            isRunning: false,
+            startTime: null,
+            elapsed: 0,
+            taskId: null
+        };
+
+        function startStudySession(taskId) {
+            studyTimer.isRunning = true;
+            studyTimer.startTime = Date.now();
+            studyTimer.taskId = taskId;
+            
+            showNotification('⏱️ Study session started!');
+            
+            // Update timer display every second
+            const timerInterval = setInterval(() => {
+                if (!studyTimer.isRunning) {
+                    clearInterval(timerInterval);
+                    return;
+                }
+                
+                studyTimer.elapsed = Date.now() - studyTimer.startTime;
+                // Update UI with timer if needed
+            }, 1000);
+        }
+
+        function stopStudySession() {
+            if (studyTimer.isRunning) {
+                studyTimer.isRunning = false;
+                const sessionDuration = Math.round(studyTimer.elapsed / 1000 / 60); // minutes
+                showNotification(`📚 Study session completed! Duration: ${sessionDuration} minutes`);
+                
+                // Reset timer
+                studyTimer = {
+                    isRunning: false,
+                    startTime: null,
+                    elapsed: 0,
+                    taskId: null
+                };
+            }
+        }
+
+        // Add dark mode toggle
+        function toggleDarkMode() {
+            document.body.classList.toggle('dark-mode');
+            studyData.settings.theme = studyData.settings.theme === 'dark' ? 'default' : 'dark';
+            saveData();
+        }
+
+        // Initialize with sample data if empty (for demo purposes)
+        setTimeout(() => {
+            if (studyData.tasks.length === 0) {
+                const addSampleButton = document.createElement('button');
+                addSampleButton.className = 'btn btn-secondary';
+                addSampleButton.innerHTML = '📚 Load Sample Tasks';
+                addSampleButton.onclick = addSampleData;
+                addSampleButton.style.margin = '20px auto';
+                addSampleButton.style.display = 'block';
+                
+                document.querySelector('.container').appendChild(addSampleButton);
+            }
+        }, 1000); 
